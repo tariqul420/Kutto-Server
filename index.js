@@ -73,18 +73,18 @@ const client = new MongoClient(uri, {
 
 async function run() {
     try {
-        // await client.connect();
-        // await client.db("admin").command({ ping: 1 });
+        await client.connect();
+        await client.db("admin").command({ ping: 1 });
         console.log("☘️  You successfully connected to MongoDB!");
 
         // Database Collection Name
-        const db = client.db('DatabaseName')
+        const db = client.db('Kutto')
         const usersCollection = db.collection('Users')
 
 
         // Verify Jwt Token
         const verifyToken = async (req, res, next) => {
-            const token = req.cookies.TokenName
+            const token = req.cookies.kutto_Token
             if (!token) return res.status(401).send({ error: 'unauthorized access' })
 
             // Verify Token
@@ -113,7 +113,7 @@ async function run() {
             try {
                 const userInfo = req.body
                 const token = jwt.sign(userInfo, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' })
-                res.cookie('TokenName', token, {
+                res.cookie('kutto_Token', token, {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === "production",
                     sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
@@ -125,18 +125,19 @@ async function run() {
         })
 
         //logout when not access jwt token
-        app.post('/logout', async (req, res) => {
+        app.get('/logout', async (req, res) => {
             try {
-                res.clearCookie('ServiceOrbit_Token', {
+                res.clearCookie('kutto_Token', {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === "production",
                     sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-                }).send({ success: true })
-            } catch (error) {
-                console.error('Logout:', err.message)
-                res.status(500).send({ error: 'Failed to logout when not access jwt token' })
+                    path: '/', // Match the path
+                }).send({ success: true });
+            } catch (err) {
+                console.error('Logout:', err.message);
+                res.status(500).send({ error: 'Failed to logout' });
             }
-        })
+        });
 
         // post single user in the database
         app.post('/users', async (req, res) => {
@@ -149,25 +150,25 @@ async function run() {
                     return res.send(isExist)
                 }
 
-                const result = await usersCollection.insertOne(user)
+                const result = await usersCollection.insertOne({ ...user, role: 'user' })
 
                 // send email when first login
                 if (result?.insertedId) {
                     sendEmail(user?.email, {
-                        subject: "Welcome to [Your Website Name]!",
+                        subject: "Welcome to Kutto!",
                         message: `
                         <div style="font-family: Arial, sans-serif; line-height: 1.6; background-color: #f3f4f6; padding: 20px;">
                         <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
                             <!-- Header -->
                             <div style="background-color: #007bff; color: #ffffff; padding: 20px; text-align: center;">
-                            <h1 style="margin: 0; font-size: 24px;">Welcome to [Your Website Name]!</h1>
+                            <h1 style="margin: 0; font-size: 24px;">Welcome to Kutto!</h1>
                             </div>
 
                             <!-- Body -->
                             <div style="padding: 20px; color: #333;">
                             <p style="font-size: 16px; margin-bottom: 20px;">Hi ${user.name},</p>
                             <p style="font-size: 16px; margin-bottom: 20px;">
-                                Thank you for joining [Your Website Name]! We are delighted to have you on board and are excited to help you make the most of your experience.
+                                Thank you for joining Kutto! We are delighted to have you on board and are excited to help you make the most of your experience.
                             </p>
                             <p style="font-size: 16px; font-weight: bold; margin-bottom: 20px;">Here’s how to get started:</p>
                             <ol style="font-size: 16px; color: #333; padding-left: 20px;">
@@ -189,7 +190,7 @@ async function run() {
                             </p>
                             <p style="font-size: 16px; margin-bottom: 20px;">We’re here to help you succeed!</p>
                             <p style="font-size: 16px; margin-top: 30px;">Best regards,</p>
-                            <p style="font-size: 16px; font-weight: bold;">The [Your Website Name] Team</p>
+                            <p style="font-size: 16px; font-weight: bold;">The Kutto Team</p>
                             </div>
 
                             <!-- Footer -->
@@ -197,7 +198,7 @@ async function run() {
                             <p style="margin: 0;">If you didn’t sign up for this account, please ignore this email or contact us at 
                                 <a href="mailto:[Support Email]" style="color: #007bff; text-decoration: none;">[Support Email]</a>.
                             </p>
-                            <p style="margin: 10px 0;">&copy; ${new Date().getFullYear()} [Your Website Name]. All rights reserved.</p>
+                            <p style="margin: 10px 0;">&copy; ${new Date().getFullYear()} Kutto. All rights reserved.</p>
                             </div>
                         </div>
                         </div>

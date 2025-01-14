@@ -247,6 +247,37 @@ async function run() {
             }
         })
 
+        //get all users
+        app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
+            try {
+                const email = req?.user?.email
+                const result = await usersCollection.find({ email: { $ne: email } }).toArray();
+                res.send(result)
+            } catch (error) {
+                console.error('all users:', error.message)
+                res.status(500).send({ error: 'Failed to  get all users' })
+            }
+        })
+
+        // user role update
+        app.patch('/user-role-update/:email', verifyToken, verifyAdmin, async (req, res) => {
+            try {
+                const email = req.params.email
+                const updateDoc = {
+                    $set: {
+                        role: 'admin',
+                        status: 'verified'
+                    }
+                }
+
+                const result = await usersCollection.updateOne({ email }, updateDoc)
+                res.send(result)
+            } catch (error) {
+                console.error('Role update:', error.message)
+                res.status(500).send({ error: 'Failed to  role update' })
+            }
+        })
+
     } catch (err) {
         console.error('Mongodb', err.message)
     }

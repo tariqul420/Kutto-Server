@@ -12,7 +12,7 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 const corsOptions = {
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173", "https://kutto-0.web.app", "https://kutto-0.firebaseapp.com"],
     credentials: true,
 }
 
@@ -80,7 +80,7 @@ async function run() {
         // Database Collection Name
         const db = client.db('Kutto')
         const usersCollection = db.collection('Users')
-
+        const petCollection = db.collection('Pets')
 
         // Verify Jwt Token
         const verifyToken = async (req, res, next) => {
@@ -275,6 +275,18 @@ async function run() {
             } catch (error) {
                 console.error('Role update:', error.message)
                 res.status(500).send({ error: 'Failed to  role update' })
+            }
+        })
+
+        // save single pet data on database
+        app.post('/add-pet', verifyToken, async (req, res) => {
+            try {
+                const petData = req.body
+                const result = await petCollection.insertOne(petData)
+                res.send(result)
+            } catch (error) {
+                console.error('Add pet:', error.message)
+                res.status(500).send({ error: 'Failed to  add single pet' })
             }
         })
 

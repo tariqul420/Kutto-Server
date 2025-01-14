@@ -309,7 +309,7 @@ async function run() {
         })
 
         // Status update update pet
-        app.patch('/adopt-pet/:id', async (req, res) => {
+        app.patch('/adopt-pet/:id', verifyToken, async (req, res) => {
             try {
                 const id = req.params.id
                 const query = { _id: new ObjectId(id) }
@@ -330,7 +330,7 @@ async function run() {
         })
 
         // delete my pet
-        app.delete('/delete-pet/:id', async (req, res) => {
+        app.delete('/delete-pet/:id', verifyToken, async (req, res) => {
             try {
                 const id = req.params.id
                 const query = { _id: new ObjectId(id) }
@@ -343,6 +343,39 @@ async function run() {
             }
         })
 
+        // get single pet data
+        app.get('/pets/:id', verifyToken, async (req, res) => {
+            try {
+                const id = req.params.id
+                const query = { _id: new ObjectId(id) }
+
+                const result = await petCollection.findOne(query)
+                res.send(result)
+            } catch (error) {
+                console.error('get single pets:', error.message)
+                res.status(500).send({ error: 'Failed to get single pet data' })
+            }
+        })
+
+        // update single pet
+        app.put('/update-pets/:id', verifyToken, async (req, res) => {
+            try {
+                const id = req.params.id
+                const query = { _id: new ObjectId(id) }
+                const updateData = req.body
+
+                const updateDoc = {
+                    $set: updateData
+                }
+
+                const result = await petCollection.updateOne(query, updateDoc)
+                res.send(result)
+            } catch (error) {
+                console.error('update single pets:', error.message)
+                res.status(500).send({ error: 'Failed to update single pet data' })
+            }
+        })
+
     } catch (err) {
         console.error('Mongodb', err.message)
     }
@@ -350,7 +383,7 @@ async function run() {
 run().catch(console.dir);
 
 app.get('/', (req, res) => {
-    res.send('Hello Programmer. How Are You? This Server For No-Name Website ❤️')
+    res.send('Hello Programmer. How Are You? This Server For Kutto Website ❤️')
 })
 
 app.listen(port, () => {

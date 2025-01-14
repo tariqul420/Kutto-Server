@@ -290,6 +290,24 @@ async function run() {
             }
         })
 
+        // get my added pets
+        app.get('/my-pets/:email', verifyToken, async (req, res) => {
+            try {
+                const email = req?.params.email
+
+                if (req?.user?.email !== email) {
+                    return res.status(403).send({ message: 'forbidden access' });
+                }
+
+                const result = await petCollection.find({ "petOwner.email": email }).toArray()
+
+                res.send(result)
+            } catch (error) {
+                console.error('My pets:', error.message)
+                res.status(500).send({ error: 'Failed to get my pets' })
+            }
+        })
+
     } catch (err) {
         console.error('Mongodb', err.message)
     }

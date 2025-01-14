@@ -308,6 +308,41 @@ async function run() {
             }
         })
 
+        // Status update update pet
+        app.patch('/adopt-pet/:id', async (req, res) => {
+            try {
+                const id = req.params.id
+                const query = { _id: new ObjectId(id) }
+
+                const updateDoc = {
+                    $set: {
+                        adopted: true
+                    }
+                }
+
+                const result = await petCollection.updateOne(query, updateDoc)
+
+                res.send(result)
+            } catch (error) {
+                console.error('adopted ped:', error.message)
+                res.status(500).send({ error: 'Failed to update adopted pet' })
+            }
+        })
+
+        // delete my pet
+        app.delete('/delete-pet/:id', async (req, res) => {
+            try {
+                const id = req.params.id
+                const query = { _id: new ObjectId(id) }
+
+                const result = await petCollection.deleteOne(query)
+                res.send(result)
+            } catch (error) {
+                console.error('delete pets:', error.message)
+                res.status(500).send({ error: 'Failed to delete my pets' })
+            }
+        })
+
     } catch (err) {
         console.error('Mongodb', err.message)
     }

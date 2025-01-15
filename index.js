@@ -81,6 +81,7 @@ async function run() {
         const db = client.db('Kutto')
         const usersCollection = db.collection('Users')
         const petCollection = db.collection('Pets')
+        const adoptionCollection = db.collection('Adoption')
 
         // Verify Jwt Token
         const verifyToken = async (req, res, next) => {
@@ -344,7 +345,7 @@ async function run() {
         })
 
         // get single pet data
-        app.get('/pets/:id', verifyToken, async (req, res) => {
+        app.get('/pets/:id', async (req, res) => {
             try {
                 const id = req.params.id
                 const query = { _id: new ObjectId(id) }
@@ -404,6 +405,21 @@ async function run() {
                 console.error('all pets:', error.message)
                 res.status(500).send({ error: 'Failed to get all pet which not adopted' })
             }
+        })
+
+        // post single adoption request
+        app.post('/adoption-request', async (req, res) => {
+            const data = req.body
+
+            const query = { 'petAdopter.email': data?.petAdopter?.email, petId: data?.petId }
+
+            const alreadyExist = await adoptionCollection.findOne(query)
+
+            if (alreadyExist) return res.status(400).send('You already adopted this pet!')
+
+            const result = await adoptionCollection.insertOne(data)
+
+            res.send(result)
         })
 
     } catch (err) {

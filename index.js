@@ -309,26 +309,46 @@ async function run() {
             }
         })
 
-        // Status update update pet
+
+        // update pet adoption status
         app.patch('/adopt-pet/:id', verifyToken, async (req, res) => {
             try {
-                const id = req.params.id
-                const query = { _id: new ObjectId(id) }
+                const id = req.params.id;
+                const status = req.query.status;
+                const query = { _id: new ObjectId(id) };
+                const petId = { petId: id }
 
-                const updateDoc = {
-                    $set: {
-                        adopted: true
-                    }
+                let petResult = {};
+                let adoptionResult = {};
+
+                if (status !== 'rejected') {
+                    const updatePetDoc = {
+                        $set: {
+                            adopted: true
+                        }
+                    };
+                    petResult = await petCollection.updateOne(query, updatePetDoc);
                 }
 
-                const result = await petCollection.updateOne(query, updateDoc)
+                const updateStatusDoc = {
+                    $set: {
+                        status: status
+                    }
+                };
 
-                res.send(result)
+                adoptionResult = await adoptionCollection.updateOne(petId, updateStatusDoc);
+
+                res.send({
+                    message: `Pet adoption updated successfully to status: ${status}`,
+                    petResult,
+                    adoptionResult
+                });
             } catch (error) {
-                console.error('adopted ped:', error.message)
-                res.status(500).send({ error: 'Failed to update adopted pet' })
+                console.error('Error in adopt-pet route:', error.message);
+                res.status(500).send({ error: 'Failed to update adopted pet' });
             }
-        })
+        });
+
 
         // delete my pet
         app.delete('/delete-pet/:id', verifyToken, async (req, res) => {
@@ -408,18 +428,36 @@ async function run() {
         })
 
         // post single adoption request
-        app.post('/adoption-request', async (req, res) => {
-            const data = req.body
+        app.post('/adoption-request', verifyToken, async (req, res) => {
+            try {
+                const data = req.body
 
-            const query = { 'petAdopter.email': data?.petAdopter?.email, petId: data?.petId }
+                const query = { 'petAdopter.email': data?.petAdopter?.email, petId: data?.petId }
 
-            const alreadyExist = await adoptionCollection.findOne(query)
+                const alreadyExist = await adoptionCollection.findOne(query)
 
-            if (alreadyExist) return res.status(400).send('You already adopted this pet!')
+                if (alreadyExist) return res.status(400).send('You already adopted this pet!')
 
-            const result = await adoptionCollection.insertOne(data)
+                const result = await adoptionCollection.insertOne({ ...data, status: "pending" })
 
-            res.send(result)
+                res.send(result)
+            } catch (error) {
+                console.error('post adoption request:', error.message)
+                res.status(500).send({ error: 'Failed to post adoption request' })
+            }
+        })
+
+        // get all pet adoption request
+        app.get('/adoption-request/:email', async (req, res) => {
+            try {
+                const { email } = req.params
+                const result = await adoptionCollection.find({ "petOwner.email": email }).toArray()
+
+                res.send(result)
+            } catch (error) {
+                console.error('all pets adoption request:', error.message)
+                res.status(500).send({ error: 'Failed to get all pet which adoption request' })
+            }
         })
 
     } catch (err) {

@@ -516,6 +516,25 @@ async function run() {
             }
         })
 
+        // update single donation campaign
+        app.put('/update-donation-campaign/:id', verifyToken, async (req, res) => {
+            try {
+                const id = req.params.id
+                const query = { _id: new ObjectId(id) }
+                const updateData = req.body
+
+                const updateDoc = {
+                    $set: updateData
+                }
+
+                const result = await donationCollection.updateOne(query, updateDoc)
+                res.send(result)
+            } catch (error) {
+                console.error('update single pets:', error.message)
+                res.status(500).send({ error: 'Failed to update single pet data' })
+            }
+        })
+
     } catch (err) {
         console.error('Mongodb', err.message)
     }

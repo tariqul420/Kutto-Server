@@ -82,6 +82,7 @@ async function run() {
         const usersCollection = db.collection('Users')
         const petCollection = db.collection('Pets')
         const adoptionCollection = db.collection('Adoption')
+        const donationCollection = db.collection("Donation")
 
         // Verify Jwt Token
         const verifyToken = async (req, res, next) => {
@@ -448,7 +449,7 @@ async function run() {
         })
 
         // get all pet adoption request
-        app.get('/adoption-request/:email', async (req, res) => {
+        app.get('/adoption-request/:email', verifyToken, async (req, res) => {
             try {
                 const { email } = req.params
                 const result = await adoptionCollection.find({ "petOwner.email": email }).toArray()
@@ -457,6 +458,18 @@ async function run() {
             } catch (error) {
                 console.error('all pets adoption request:', error.message)
                 res.status(500).send({ error: 'Failed to get all pet which adoption request' })
+            }
+        })
+
+        // create a donation campaign
+        app.post('/create-donation', verifyToken, async (req, res) => {
+            try {
+                const donationData = req.body
+                const result = await donationCollection.insertOne(donationData)
+                res.send(result)
+            } catch (error) {
+                console.error('create donation:', error.message)
+                res.status(500).send({ error: 'Failed to create a donation' })
             }
         })
 

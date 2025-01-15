@@ -486,6 +486,22 @@ async function run() {
             }
         })
 
+        // donation status update
+        app.patch('/donation-status/:id', async (req, res) => {
+            const id = req.params.id
+            const status = req.query.status
+            const query = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    status: status === 'true' ? 'Pause' : 'Running'
+                }
+            }
+
+            const result = await donationCollection.updateOne(query, updateDoc)
+
+            res.send(result)
+        })
+
     } catch (err) {
         console.error('Mongodb', err.message)
     }

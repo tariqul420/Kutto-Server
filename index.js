@@ -376,6 +376,36 @@ async function run() {
             }
         })
 
+        // get all pet which not adopted
+        app.get('/all-pet', async (req, res) => {
+            try {
+                const { search = "", category = "", sort = "", page = 1, limit = 6 } = req.query;
+
+                const query = { adopted: false };
+                if (search) {
+                    query.petName = { $regex: search, $options: "i" };
+                }
+                if (category) {
+                    query.petCategories = category;
+                }
+
+                const sortQuery = sort === "new" ? { createdAt: -1 } : sort === "old" ? { createdAt: 1 } : {};
+
+                const skip = (page - 1) * parseInt(limit);
+                const pets = await petCollection
+                    .find(query)
+                    .sort(sortQuery)
+                    .skip(skip)
+                    .limit(parseInt(limit))
+                    .toArray();
+
+                res.send(pets);
+            } catch (error) {
+                console.error('all pets:', error.message)
+                res.status(500).send({ error: 'Failed to get all pet which not adopted' })
+            }
+        })
+
     } catch (err) {
         console.error('Mongodb', err.message)
     }

@@ -502,6 +502,20 @@ async function run() {
             res.send(result)
         })
 
+        // get a single donation 
+        app.get('/donation-details/:id', async (req, res) => {
+            try {
+                const id = req.params.id
+                const query = { _id: new ObjectId(id) }
+
+                const result = await donationCollection.findOne(query)
+                res.send(result)
+            } catch (error) {
+                console.error('get single donation details:', error.message)
+                res.status(500).send({ error: 'Failed to get single donation data' })
+            }
+        })
+
     } catch (err) {
         console.error('Mongodb', err.message)
     }

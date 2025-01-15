@@ -473,6 +473,19 @@ async function run() {
             }
         })
 
+        // get my donation
+        app.get('/my-donation/:email', verifyToken, async (req, res) => {
+            try {
+                const { email } = req.params
+                const result = await donationCollection.find({ "donationOwner.email": email }).toArray()
+
+                res.send(result)
+            } catch (error) {
+                console.error('my donation:', error.message)
+                res.status(500).send({ error: 'Failed to get my all donation' })
+            }
+        })
+
     } catch (err) {
         console.error('Mongodb', err.message)
     }

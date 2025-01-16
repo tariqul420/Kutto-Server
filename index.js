@@ -268,7 +268,14 @@ async function run() {
                 const id = req.params.id
                 const query = { _id: new ObjectId(id) }
 
-                const result = await donationCollection.findOne(query)
+                const projection = {
+                    projection: {
+                        donationOwner: 0,
+                        totalDonateUser: 0
+                    }
+                }
+
+                const result = await donationCollection.findOne(query, projection)
                 res.send(result)
             } catch (error) {
                 console.error('get single donation details:', error.message)
@@ -357,7 +364,17 @@ async function run() {
                     return res.status(403).send({ message: 'forbidden access' });
                 }
 
-                const result = await petCollection.find({ "petOwner.email": email }).toArray()
+                const projection = {
+                    projection: {
+                        _id: 1,
+                        petImage: 1,
+                        petName: 1,
+                        petCategories: 1,
+                        adopted: 1
+                    }
+                }
+
+                const result = await petCollection.find({ "petOwner.email": email }, projection).toArray()
 
                 res.send(result)
             } catch (error) {
@@ -464,7 +481,18 @@ async function run() {
         app.get('/adoption-request/:email', verifyToken, async (req, res) => {
             try {
                 const { email } = req.params
-                const result = await adoptionCollection.find({ "petOwner.email": email }).toArray()
+
+                const projection = {
+                    projection: {
+                        _id: 1,
+                        petImage: 1,
+                        petName: 1,
+                        petAdopter: 1,
+                        status: 1
+                    }
+                }
+
+                const result = await adoptionCollection.find({ "petOwner.email": email }, projection).toArray()
 
                 res.send(result)
             } catch (error) {
@@ -489,7 +517,20 @@ async function run() {
         app.get('/my-donation/:email', verifyToken, async (req, res) => {
             try {
                 const { email } = req.params
-                const result = await donationCollection.find({ "donationOwner.email": email }).toArray()
+
+                const projection = {
+                    projection: {
+                        _id: 1,
+                        donationImage: 1,
+                        donationName: 1,
+                        maxAmount: 1,
+                        status: 1,
+                        totalDonateAmount: 1,
+                        totalDonateUser: 1
+                    }
+                }
+
+                const result = await donationCollection.find({ "donationOwner.email": email }, projection).toArray()
 
                 res.send(result)
             } catch (error) {

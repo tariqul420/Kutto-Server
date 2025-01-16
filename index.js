@@ -366,7 +366,6 @@ async function run() {
             }
         })
 
-        // User & Admin
         // update pet adoption status
         app.patch('/adopt-pet/:id', verifyToken, async (req, res) => {
             try {
@@ -576,6 +575,50 @@ async function run() {
             } catch (error) {
                 console.error('Role update:', error.message)
                 res.status(500).send({ error: 'Failed to  role update' })
+            }
+        })
+
+        // get all pet data for admin
+        app.get('/all-pet-admin', verifyToken, verifyAdmin, async (req, res) => {
+            try {
+                const projection = {
+                    projection: {
+                        _id: 1,
+                        petImage: 1,
+                        petName: 1,
+                        petCategories: 1,
+                        adopted: 1,
+                        "petOwner.email": 1
+                    }
+                }
+
+                const result = await petCollection.find({}, projection).toArray()
+                res.send(result)
+            } catch (error) {
+                console.error('all pet admin:', error.message)
+                res.status(500).send({ error: 'Failed to  get all pet for admin' })
+            }
+        })
+
+        // adoption status update
+        app.patch('/adoption-status-admin/:id', verifyToken, verifyAdmin, async (req, res) => {
+            try {
+                const { id } = req.params;
+                const { adopted } = req.body;
+
+                const query = { _id: new ObjectId(id) }
+
+                const updateDoc = {
+                    $set: {
+                        adopted
+                    }
+                }
+
+                const result = await petCollection.updateOne(query, updateDoc);
+
+                res.send(result)
+            } catch (error) {
+
             }
         })
 

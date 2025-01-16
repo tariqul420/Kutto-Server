@@ -414,8 +414,19 @@ async function run() {
                 const sortQuery = sort === "new" ? { createdAt: -1 } : sort === "old" ? { createdAt: 1 } : {};
 
                 const skip = (page - 1) * parseInt(limit);
+
+                const projection = {
+                    projection: {
+                        _id: 1,
+                        petImage: 1,
+                        petName: 1,
+                        petAge: 1,
+                        petLocation: 1
+                    }
+                }
+
                 const pets = await petCollection
-                    .find(query)
+                    .find(query, projection)
                     .sort(sortQuery)
                     .skip(skip)
                     .limit(parseInt(limit))

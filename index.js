@@ -84,6 +84,8 @@ async function run() {
         const adoptionCollection = db.collection('Adoption')
         const donationCollection = db.collection("Donation")
 
+        //  ------------------- Common --------------------
+
         // Verify Jwt Token
         const verifyToken = async (req, res, next) => {
             const token = req.cookies.kutto_Token
@@ -96,18 +98,6 @@ async function run() {
                 req.user = decoded
                 next()
             })
-        }
-
-        // verify Admin
-        const verifyAdmin = async (req, res, next) => {
-            const email = req?.user?.email
-            const query = { email };
-            const user = await usersCollection.findOne(query)
-            const isAdmin = user?.role === 'admin';
-            if (!user || !isAdmin) {
-                return res.status(403).send({ message: 'forbidden access. || only access admin!' });
-            }
-            next()
         }
 
         // Create Jwt Token
@@ -159,52 +149,52 @@ async function run() {
                     sendEmail(user?.email, {
                         subject: "Welcome to Kutto!",
                         message: `
-                        <div style="font-family: Arial, sans-serif; line-height: 1.6; background-color: #f3f4f6; padding: 20px;">
-                        <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-                            <!-- Header -->
-                            <div style="background-color: #007bff; color: #ffffff; padding: 20px; text-align: center;">
-                            <h1 style="margin: 0; font-size: 24px;">Welcome to Kutto!</h1>
-                            </div>
-
-                            <!-- Body -->
-                            <div style="padding: 20px; color: #333;">
-                            <p style="font-size: 16px; margin-bottom: 20px;">Hi ${user.name},</p>
-                            <p style="font-size: 16px; margin-bottom: 20px;">
-                                Thank you for joining Kutto! We are delighted to have you on board and are excited to help you make the most of your experience.
-                            </p>
-                            <p style="font-size: 16px; font-weight: bold; margin-bottom: 20px;">Here’s how to get started:</p>
-                            <ol style="font-size: 16px; color: #333; padding-left: 20px;">
-                                <li style="margin-bottom: 10px;">
-                                <strong style="color: #007bff;">Explore:</strong> Discover features and services tailored just for you.
-                                </li>
-                                <li style="margin-bottom: 10px;">
-                                <strong style="color: #007bff;">Update Your Profile:</strong> Personalize your experience by updating your profile 
-                                <a href="[Profile Link]" style="color: #007bff; text-decoration: none;">here</a>.
-                                </li>
-                                <li style="margin-bottom: 10px;">
-                                <strong style="color: #007bff;">Get Support:</strong> Need help? Visit our 
-                                <a href="[Support Link]" style="color: #007bff; text-decoration: none;">Support Center</a>.
-                                </li>
-                            </ol>
-                            <p style="font-size: 16px; margin-bottom: 20px;">
-                                If you have any questions or need assistance, feel free to reply to this email or reach out to us at 
-                                <a href="mailto:[Support Email]" style="color: #007bff; text-decoration: none;">[Support Email]</a>.
-                            </p>
-                            <p style="font-size: 16px; margin-bottom: 20px;">We’re here to help you succeed!</p>
-                            <p style="font-size: 16px; margin-top: 30px;">Best regards,</p>
-                            <p style="font-size: 16px; font-weight: bold;">The Kutto Team</p>
-                            </div>
-
-                            <!-- Footer -->
-                            <div style="background-color: #f9f9f9; padding: 10px 20px; text-align: center; font-size: 12px; color: #777;">
-                            <p style="margin: 0;">If you didn’t sign up for this account, please ignore this email or contact us at 
-                                <a href="mailto:[Support Email]" style="color: #007bff; text-decoration: none;">[Support Email]</a>.
-                            </p>
-                            <p style="margin: 10px 0;">&copy; ${new Date().getFullYear()} Kutto. All rights reserved.</p>
-                            </div>
-                        </div>
-                        </div>
-                        `
+                                <div style="font-family: Arial, sans-serif; line-height: 1.6; background-color: #f3f4f6; padding: 20px;">
+                                <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                                    <!-- Header -->
+                                    <div style="background-color: #007bff; color: #ffffff; padding: 20px; text-align: center;">
+                                    <h1 style="margin: 0; font-size: 24px;">Welcome to Kutto!</h1>
+                                    </div>
+        
+                                    <!-- Body -->
+                                    <div style="padding: 20px; color: #333;">
+                                    <p style="font-size: 16px; margin-bottom: 20px;">Hi ${user.name},</p>
+                                    <p style="font-size: 16px; margin-bottom: 20px;">
+                                        Thank you for joining Kutto! We are delighted to have you on board and are excited to help you make the most of your experience.
+                                    </p>
+                                    <p style="font-size: 16px; font-weight: bold; margin-bottom: 20px;">Here’s how to get started:</p>
+                                    <ol style="font-size: 16px; color: #333; padding-left: 20px;">
+                                        <li style="margin-bottom: 10px;">
+                                        <strong style="color: #007bff;">Explore:</strong> Discover features and services tailored just for you.
+                                        </li>
+                                        <li style="margin-bottom: 10px;">
+                                        <strong style="color: #007bff;">Update Your Profile:</strong> Personalize your experience by updating your profile 
+                                        <a href="[Profile Link]" style="color: #007bff; text-decoration: none;">here</a>.
+                                        </li>
+                                        <li style="margin-bottom: 10px;">
+                                        <strong style="color: #007bff;">Get Support:</strong> Need help? Visit our 
+                                        <a href="[Support Link]" style="color: #007bff; text-decoration: none;">Support Center</a>.
+                                        </li>
+                                    </ol>
+                                    <p style="font-size: 16px; margin-bottom: 20px;">
+                                        If you have any questions or need assistance, feel free to reply to this email or reach out to us at 
+                                        <a href="mailto:[Support Email]" style="color: #007bff; text-decoration: none;">[Support Email]</a>.
+                                    </p>
+                                    <p style="font-size: 16px; margin-bottom: 20px;">We’re here to help you succeed!</p>
+                                    <p style="font-size: 16px; margin-top: 30px;">Best regards,</p>
+                                    <p style="font-size: 16px; font-weight: bold;">The Kutto Team</p>
+                                    </div>
+        
+                                    <!-- Footer -->
+                                    <div style="background-color: #f9f9f9; padding: 10px 20px; text-align: center; font-size: 12px; color: #777;">
+                                    <p style="margin: 0;">If you didn’t sign up for this account, please ignore this email or contact us at 
+                                        <a href="mailto:[Support Email]" style="color: #007bff; text-decoration: none;">[Support Email]</a>.
+                                    </p>
+                                    <p style="margin: 10px 0;">&copy; ${new Date().getFullYear()} Kutto. All rights reserved.</p>
+                                    </div>
+                                </div>
+                                </div>
+                                `
                     })
                 }
 
@@ -214,6 +204,101 @@ async function run() {
                 res.status(500).send({ error: 'Failed to post user' })
             }
         })
+
+        //  ------------------- Public --------------------
+
+        // get single pet  details
+        app.get('/pets/:id', async (req, res) => {
+            try {
+                const id = req.params.id
+                const query = { _id: new ObjectId(id) }
+
+                const result = await petCollection.findOne(query)
+                res.send(result)
+            } catch (error) {
+                console.error('get single pets:', error.message)
+                res.status(500).send({ error: 'Failed to get single pet data' })
+            }
+        })
+
+        // get all pet which not adopted for pet listing page
+        app.get('/all-pet', async (req, res) => {
+            try {
+                const { search = "", category = "", sort = "", page = 1, limit = 6 } = req.query;
+
+                const query = { adopted: false };
+                if (search) {
+                    query.petName = { $regex: search, $options: "i" };
+                }
+                if (category) {
+                    query.petCategories = category;
+                }
+
+                const sortQuery = sort === "new" ? { createdAt: -1 } : sort === "old" ? { createdAt: 1 } : {};
+
+                const skip = (page - 1) * parseInt(limit);
+
+                const projection = {
+                    projection: {
+                        _id: 1,
+                        petImage: 1,
+                        petName: 1,
+                        petAge: 1,
+                        petLocation: 1
+                    }
+                }
+
+                const pets = await petCollection
+                    .find(query, projection)
+                    .sort(sortQuery)
+                    .skip(skip)
+                    .limit(parseInt(limit))
+                    .toArray();
+
+                res.send(pets);
+            } catch (error) {
+                console.error('all pets:', error.message)
+                res.status(500).send({ error: 'Failed to get all pet which not adopted' })
+            }
+        })
+
+        // get a single donation details
+        app.get('/donation-details/:id', async (req, res) => {
+            try {
+                const id = req.params.id
+                const query = { _id: new ObjectId(id) }
+
+                const result = await donationCollection.findOne(query)
+                res.send(result)
+            } catch (error) {
+                console.error('get single donation details:', error.message)
+                res.status(500).send({ error: 'Failed to get single donation data' })
+            }
+        })
+
+        // get all donation data
+        app.get('/donation-campaign', async (req, res) => {
+            try {
+                const { sort = "", page = 1, limit = 6 } = req.query;
+
+                const sortQuery = sort === "new" ? { createdAt: -1 } : sort === "old" ? { createdAt: 1 } : {};
+                const skip = (page - 1) * parseInt(limit);
+
+                const pets = await donationCollection
+                    .find({}, { projection: { _id: 1, donationImage: 1, donationName: 1, maxAmount: 1, totalDonateAmount: 1 } })
+                    .sort(sortQuery)
+                    .skip(skip)
+                    .limit(parseInt(limit))
+                    .toArray();
+
+                res.send(pets);
+            } catch (error) {
+                console.error('all donation:', error.message);
+                res.status(500).send({ error: 'Failed to get all donation campaign' });
+            }
+        });
+
+        //  -------------- Common & Secure -------------
 
         // Update User
         app.patch('/users/:email', async (req, res) => {
@@ -249,36 +334,7 @@ async function run() {
             }
         })
 
-        //get all users
-        app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
-            try {
-                const email = req?.user?.email
-                const result = await usersCollection.find({ email: { $ne: email } }).toArray();
-                res.send(result)
-            } catch (error) {
-                console.error('all users:', error.message)
-                res.status(500).send({ error: 'Failed to  get all users' })
-            }
-        })
-
-        // user role update
-        app.patch('/user-role-update/:email', verifyToken, verifyAdmin, async (req, res) => {
-            try {
-                const email = req.params.email
-                const updateDoc = {
-                    $set: {
-                        role: 'admin',
-                        status: 'verified'
-                    }
-                }
-
-                const result = await usersCollection.updateOne({ email }, updateDoc)
-                res.send(result)
-            } catch (error) {
-                console.error('Role update:', error.message)
-                res.status(500).send({ error: 'Failed to  role update' })
-            }
-        })
+        //  ------------------- Users --------------------
 
         // save single pet data on database
         app.post('/add-pet', verifyToken, async (req, res) => {
@@ -310,7 +366,7 @@ async function run() {
             }
         })
 
-
+        // User & Admin
         // update pet adoption status
         app.patch('/adopt-pet/:id', verifyToken, async (req, res) => {
             try {
@@ -350,7 +406,7 @@ async function run() {
             }
         });
 
-
+        // User & Admin
         // delete my pet
         app.delete('/delete-pet/:id', verifyToken, async (req, res) => {
             try {
@@ -365,20 +421,7 @@ async function run() {
             }
         })
 
-        // get single pet data
-        app.get('/pets/:id', async (req, res) => {
-            try {
-                const id = req.params.id
-                const query = { _id: new ObjectId(id) }
-
-                const result = await petCollection.findOne(query)
-                res.send(result)
-            } catch (error) {
-                console.error('get single pets:', error.message)
-                res.status(500).send({ error: 'Failed to get single pet data' })
-            }
-        })
-
+        // User & Admin
         // update single pet
         app.put('/update-pets/:id', verifyToken, async (req, res) => {
             try {
@@ -395,47 +438,6 @@ async function run() {
             } catch (error) {
                 console.error('update single pets:', error.message)
                 res.status(500).send({ error: 'Failed to update single pet data' })
-            }
-        })
-
-        // get all pet which not adopted
-        app.get('/all-pet', async (req, res) => {
-            try {
-                const { search = "", category = "", sort = "", page = 1, limit = 6 } = req.query;
-
-                const query = { adopted: false };
-                if (search) {
-                    query.petName = { $regex: search, $options: "i" };
-                }
-                if (category) {
-                    query.petCategories = category;
-                }
-
-                const sortQuery = sort === "new" ? { createdAt: -1 } : sort === "old" ? { createdAt: 1 } : {};
-
-                const skip = (page - 1) * parseInt(limit);
-
-                const projection = {
-                    projection: {
-                        _id: 1,
-                        petImage: 1,
-                        petName: 1,
-                        petAge: 1,
-                        petLocation: 1
-                    }
-                }
-
-                const pets = await petCollection
-                    .find(query, projection)
-                    .sort(sortQuery)
-                    .skip(skip)
-                    .limit(parseInt(limit))
-                    .toArray();
-
-                res.send(pets);
-            } catch (error) {
-                console.error('all pets:', error.message)
-                res.status(500).send({ error: 'Failed to get all pet which not adopted' })
             }
         })
 
@@ -513,20 +515,6 @@ async function run() {
             res.send(result)
         })
 
-        // get a single donation 
-        app.get('/donation-details/:id', async (req, res) => {
-            try {
-                const id = req.params.id
-                const query = { _id: new ObjectId(id) }
-
-                const result = await donationCollection.findOne(query)
-                res.send(result)
-            } catch (error) {
-                console.error('get single donation details:', error.message)
-                res.status(500).send({ error: 'Failed to get single donation data' })
-            }
-        })
-
         // update single donation campaign
         app.put('/update-donation-campaign/:id', verifyToken, async (req, res) => {
             try {
@@ -546,27 +534,50 @@ async function run() {
             }
         })
 
-        // get all donation data
-        app.get('/donation-campaign', async (req, res) => {
-            try {
-                const { sort = "", page = 1, limit = 6 } = req.query;
+        //  ------------------- Admin --------------------
 
-                const sortQuery = sort === "new" ? { createdAt: -1 } : sort === "old" ? { createdAt: 1 } : {};
-                const skip = (page - 1) * parseInt(limit);
-
-                const pets = await donationCollection
-                    .find({}, { projection: { _id: 1, donationImage: 1, donationName: 1, maxAmount: 1, totalDonateAmount: 1 } })
-                    .sort(sortQuery)
-                    .skip(skip)
-                    .limit(parseInt(limit))
-                    .toArray();
-
-                res.send(pets);
-            } catch (error) {
-                console.error('all donation:', error.message);
-                res.status(500).send({ error: 'Failed to get all donation campaign' });
+        // verify Admin
+        const verifyAdmin = async (req, res, next) => {
+            const email = req?.user?.email
+            const query = { email };
+            const user = await usersCollection.findOne(query)
+            const isAdmin = user?.role === 'admin';
+            if (!user || !isAdmin) {
+                return res.status(403).send({ message: 'forbidden access. || only access admin!' });
             }
-        });
+            next()
+        }
+
+        //get all users
+        app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
+            try {
+                const email = req?.user?.email
+                const result = await usersCollection.find({ email: { $ne: email } }).toArray();
+                res.send(result)
+            } catch (error) {
+                console.error('all users:', error.message)
+                res.status(500).send({ error: 'Failed to  get all users' })
+            }
+        })
+
+        // user role update
+        app.patch('/user-role-update/:email', verifyToken, verifyAdmin, async (req, res) => {
+            try {
+                const email = req.params.email
+                const updateDoc = {
+                    $set: {
+                        role: 'admin',
+                        status: 'verified'
+                    }
+                }
+
+                const result = await usersCollection.updateOne({ email }, updateDoc)
+                res.send(result)
+            } catch (error) {
+                console.error('Role update:', error.message)
+                res.status(500).send({ error: 'Failed to  role update' })
+            }
+        })
 
     } catch (err) {
         console.error('Mongodb', err.message)

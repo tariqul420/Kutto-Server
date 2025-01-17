@@ -330,10 +330,6 @@ async function run() {
             try {
                 const email = req.params.email
 
-                if (req?.user?.email !== email) {
-                    return res.status(403).send({ message: 'forbidden access' });
-                }
-
                 const result = await usersCollection.findOne({ email })
 
                 res.send({ role: result?.role })

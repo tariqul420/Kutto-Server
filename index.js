@@ -74,8 +74,8 @@ const client = new MongoClient(uri, {
 
 async function run() {
     try {
-        await client.connect();
-        await client.db("admin").command({ ping: 1 });
+        // await client.connect();
+        // await client.db("admin").command({ ping: 1 });
         console.log("☘️  You successfully connected to MongoDB!");
 
         // Database Collection Name
@@ -310,7 +310,7 @@ async function run() {
         //  -------------- Common & Secure -------------
 
         // Update User
-        app.patch('/users/:email', async (req, res) => {
+        app.patch('/users/:email', verifyToken, async (req, res) => {
             const email = req.params.email
             const userData = req.body
 
@@ -340,7 +340,7 @@ async function run() {
         })
 
         // create payment intent
-        app.post('/create-payment-intent', async (req, res) => {
+        app.post('/create-payment-intent', verifyToken, async (req, res) => {
             try {
                 const { amount } = req.body
                 const donationAmount = parseInt(amount * 100);
@@ -360,7 +360,7 @@ async function run() {
         })
 
         // save payment history in database
-        app.post('/save-payment-history', async (req, res) => {
+        app.post('/save-payment-history', verifyToken, async (req, res) => {
             try {
                 const paymentHistory = req.body
                 const query = { _id: new ObjectId(paymentHistory?.donationId) }
@@ -591,21 +591,24 @@ async function run() {
             }
         })
 
+        // user & admin
         // donation status update
         app.patch('/donation-status/:id', async (req, res) => {
-            const id = req.params.id
-            const status = req.query.status
-            const query = { _id: new ObjectId(id) }
-            const updateDoc = {
-                $set: {
-                    status: status === 'true' ? 'Pause' : 'Running'
-                }
+            try {
+                const id = req.params.id;
+                const status = req.query.status;
+                const query = { _id: new ObjectId(id) };
+                const updateDoc = {
+                    $set: { status },
+                };
+
+                const result = await donationCollection.updateOne(query, updateDoc);
+                res.send(result);
+            } catch (error) {
+                console.error('update donation status:', error.message)
+                res.status(500).send({ error: 'Failed to update donation status' })
             }
-
-            const result = await donationCollection.updateOne(query, updateDoc)
-
-            res.send(result)
-        })
+        });
 
         // update single donation campaign
         app.put('/update-donation-campaign/:id', verifyToken, async (req, res) => {
@@ -631,8 +634,8 @@ async function run() {
                 const result = await donationCollection.updateOne(query, updateDoc)
                 res.send(result)
             } catch (error) {
-                console.error('update single pets:', error.message)
-                res.status(500).send({ error: 'Failed to update single pet data' })
+                console.error('update single donation camp:', error.message)
+                res.status(500).send({ error: 'Failed to update single donation campaign' })
             }
         })
 
@@ -766,7 +769,31 @@ async function run() {
 
                 res.send(result)
             } catch (error) {
+                console.error('update adoption status:', error.message)
+                res.status(500).send({ error: 'Failed to update adoption status for admin' })
+            }
+        })
 
+        // get all donation campaign
+        app.get('/all-donation-campaign-admin', verifyToken, verifyAdmin, async (req, res) => {
+            try {
+                const projection = {
+                    projection: {
+                        _id: 1,
+                        donationImage: 1,
+                        donationName: 1,
+                        maxAmount: 1,
+                        totalDonateAmount: 1,
+                        status: 1,
+                        'donationOwner.email': 1
+                    }
+                }
+
+                const result = await donationCollection.find({}, projection).toArray()
+                res.send(result)
+            } catch (error) {
+                console.error('all donation camp admin:', error.message)
+                res.status(500).send({ error: 'Failed to  get all donation campaign for admin' })
             }
         })
 

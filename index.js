@@ -361,25 +361,36 @@ async function run() {
 
         // save payment history in database
         app.post('/save-payment-history', async (req, res) => {
-            const paymentHistory = req.body
+            try {
+                const paymentHistory = req.body
+                const query = { _id: new ObjectId(paymentHistory?.donationId) }
 
-            const query = { _id: new ObjectId(paymentHistory?.donationId) }
+                const donation = await donationCollection.findOne(query);
 
-            const savePayment = await paymentCollection.insertOne(paymentHistory)
+                const updatedAmount = donation.totalDonateAmount + paymentHistory?.amount;
 
-            const updateDoc = {
-                $inc: {
-                    totalDonateAmount: paymentHistory?.amount,
-                    totalDonateUser: 1
+                const savePayment = await paymentCollection.insertOne(paymentHistory)
+
+                const updateDoc = {
+                    $inc: {
+                        totalDonateAmount: paymentHistory?.amount,
+                        totalDonateUser: 1
+                    },
+                    $set: {
+                        status: updatedAmount >= donation.maxAmount ? 'Complete' : 'Running',
+                    },
                 }
+
+                const updateHistory = await donationCollection.updateOne(query, updateDoc)
+
+                res.send({
+                    savePayment,
+                    updateHistory
+                })
+            } catch (error) {
+                console.error('Save payment history:', error.message)
+                res.status(500).send({ error: 'Failed to  save payment history' })
             }
-
-            const updateHistory = await donationCollection.updateOne(query, updateDoc)
-
-            res.send({
-                savePayment,
-                updateHistory
-            })
         })
 
         //  ------------------- Users --------------------

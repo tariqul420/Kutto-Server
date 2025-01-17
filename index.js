@@ -232,6 +232,7 @@ async function run() {
                 if (search) {
                     query.petName = { $regex: search, $options: "i" };
                 }
+
                 if (category) {
                     query.petCategories = category;
                 }
@@ -246,9 +247,9 @@ async function run() {
                         petImage: 1,
                         petName: 1,
                         petAge: 1,
-                        petLocation: 1
-                    }
-                }
+                        petLocation: 1,
+                    },
+                };
 
                 const pets = await petCollection
                     .find(query, projection)
@@ -259,10 +260,10 @@ async function run() {
 
                 res.send(pets);
             } catch (error) {
-                console.error('all pets:', error.message)
-                res.status(500).send({ error: 'Failed to get all pet which not adopted' })
+                console.error('all pets:', error.message);
+                res.status(500).send({ error: 'Failed to get all pets which are not adopted' });
             }
-        })
+        });
 
         // get a single donation details
         app.get('/donation-details/:id', async (req, res) => {
@@ -300,17 +301,17 @@ async function run() {
 
                 const skip = (page - 1) * parseInt(limit);
 
-                const pets = await donationCollection
+                const donations = await donationCollection
                     .find(query, { projection: { _id: 1, donationImage: 1, donationName: 1, maxAmount: 1, totalDonateAmount: 1 } })
                     .sort(sortQuery)
                     .skip(skip)
                     .limit(parseInt(limit))
                     .toArray();
 
-                res.send(pets);
+                res.send(donations);
             } catch (error) {
-                console.error('all donation:', error.message);
-                res.status(500).send({ error: 'Failed to get all donation campaign' });
+                console.error('Error fetching donations:', error.message);
+                res.status(500).send({ error: 'Failed to get all donation campaigns' });
             }
         });
 

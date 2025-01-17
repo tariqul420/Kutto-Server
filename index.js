@@ -614,8 +614,18 @@ async function run() {
                 const query = { _id: new ObjectId(id) }
                 const updateData = req.body
 
+                const currentCampaign = await donationCollection.findOne(query);
+
+                const updatedTotalDonateAmount = updateData.totalDonateAmount || currentCampaign.totalDonateAmount;
+                const maxAmount = updateData.maxAmount || currentCampaign.maxAmount;
+
+                const updatedStatus = updatedTotalDonateAmount < maxAmount ? 'Running' : currentCampaign.status;
+
                 const updateDoc = {
-                    $set: updateData
+                    $set: {
+                        ...updateData,
+                        status: updatedStatus,
+                    },
                 }
 
                 const result = await donationCollection.updateOne(query, updateDoc)

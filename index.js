@@ -377,7 +377,8 @@ async function run() {
             const updateHistory = await donationCollection.updateOne(query, updateDoc)
 
             res.send({
-                savePayment
+                savePayment,
+                updateHistory
             })
         })
 
@@ -612,6 +613,23 @@ async function run() {
                 console.error('update single pets:', error.message)
                 res.status(500).send({ error: 'Failed to update single pet data' })
             }
+        })
+
+        //get my donation history
+        app.get('/my-donation-history/:email', verifyToken, async (req, res) => {
+            const email = req.params.email
+
+            const projection = {
+                projection: {
+                    donationName: 1,
+                    donationImage: 1,
+                    amount: 1,
+                    paymentId: 1
+                }
+            }
+
+            const result = await paymentCollection.find({ email }, projection).toArray()
+            res.send(result)
         })
 
         //  ------------------- Admin --------------------

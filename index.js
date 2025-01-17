@@ -288,13 +288,20 @@ async function run() {
         // get all donation data
         app.get('/donation-campaign', async (req, res) => {
             try {
-                const { sort = "", page = 1, limit = 6 } = req.query;
+                const { search = "", sort = "", page = 1, limit = 6 } = req.query;
+
+                const query = {}
+
+                if (search) {
+                    query.donationName = { $regex: search, $options: "i" };
+                }
 
                 const sortQuery = sort === "new" ? { createdAt: -1 } : sort === "old" ? { createdAt: 1 } : {};
+
                 const skip = (page - 1) * parseInt(limit);
 
                 const pets = await donationCollection
-                    .find({}, { projection: { _id: 1, donationImage: 1, donationName: 1, maxAmount: 1, totalDonateAmount: 1 } })
+                    .find(query, { projection: { _id: 1, donationImage: 1, donationName: 1, maxAmount: 1, totalDonateAmount: 1 } })
                     .sort(sortQuery)
                     .skip(skip)
                     .limit(parseInt(limit))

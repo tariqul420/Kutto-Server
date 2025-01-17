@@ -334,6 +334,34 @@ async function run() {
             }
         })
 
+        // get data category ex: dog, cat etc
+        app.get('/pets-category/:category', async (req, res) => {
+            try {
+                const { page = 1, limit = 6 } = req.query;
+                const category = req.params.category
+                const filter = { petCategories: category }
+
+                const skip = (page - 1) * parseInt(limit);
+
+                const projection = {
+                    projection: {
+                        _id: 1,
+                        petImage: 1,
+                        petName: 1,
+                        petAge: 1,
+                        petLocation: 1,
+                    },
+                };
+
+                const result = await petCollection.find(filter, projection).skip(skip).limit(parseInt(limit)).toArray()
+
+                res.send(result)
+            } catch (error) {
+                console.error('pets-category:', error.message)
+                res.status(500).send({ error: 'Failed to to get pets-category wise data' })
+            }
+        })
+
         //  -------------- Common & Secure -------------
 
         // Update User

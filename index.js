@@ -797,6 +797,21 @@ async function run() {
             }
         })
 
+        // delete donation campaign
+        app.delete('/donation-campaign-admin/:id', verifyToken, verifyAdmin, async (req, res) => {
+            try {
+                const id = req.params.id
+                const query = { _id: new ObjectId(id) }
+
+                const result = await donationCollection.deleteOne(query)
+
+                res.send(result)
+            } catch (error) {
+                console.error('delete donation camp:', error.message)
+                res.status(500).send({ error: 'Failed to delete donation campaign' })
+            }
+        })
+
     } catch (err) {
         console.error('Mongodb', err.message)
     }

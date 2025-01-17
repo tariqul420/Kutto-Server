@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const morgan = require('morgan');
 const nodemailer = require("nodemailer");
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -83,6 +84,7 @@ async function run() {
         const petCollection = db.collection('Pets')
         const adoptionCollection = db.collection('Adoption')
         const donationCollection = db.collection("Donation")
+        const paymentCollection = db.collection('Payment')
 
         //  ------------------- Common --------------------
 
@@ -324,7 +326,7 @@ async function run() {
         })
 
         // get user role
-        app.get('/users/role/:email', verifyToken, async (req, res) => {
+        app.get('/users/role/:email', async (req, res) => {
             try {
                 const email = req.params.email
 
@@ -339,6 +341,35 @@ async function run() {
                 console.error('Check Role:', error.message)
                 res.status(500).send({ error: 'Failed to check role' })
             }
+        })
+
+        // create payment intent
+        app.post('/create-payment-intent', async (req, res) => {
+            try {
+                const { amount } = req.body
+                const donationAmount = parseInt(amount * 100);
+
+                const paymentIntent = await stripe.paymentIntents.create({
+                    amount: donationAmount,
+                    currency: "usd",
+                    payment_method_types: ['card']
+                })
+
+
+                res.send(paymentIntent.client_secret)
+            } catch {
+                console.error('payment intent:', error.message)
+                res.status(500).send({ error: 'Failed to  to create payment intent' })
+            }
+        })
+
+        // save payment history in database
+        app.post('/save-payment-history', async (req, res) => {
+            const paymentHistory = req.body
+
+            const result = await paymentCollection.insertOne(paymentHistory)
+
+            res.send(result)
         })
 
         //  ------------------- Users --------------------

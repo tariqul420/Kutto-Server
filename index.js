@@ -624,12 +624,40 @@ async function run() {
                     donationName: 1,
                     donationImage: 1,
                     amount: 1,
-                    paymentId: 1
+                    paymentId: 1,
+                    donationId: 1
                 }
             }
 
             const result = await paymentCollection.find({ email }, projection).toArray()
             res.send(result)
+        })
+
+        // refund my donation amount
+        app.patch('/refund-donation/:id', verifyToken, async (req, res) => {
+            try {
+                const id = req.params.id
+                const { amount } = req.body
+
+                const updateDoc = {
+                    $inc: {
+                        totalDonateAmount: -amount,
+                        totalDonateUser: -1
+                    }
+                }
+
+                const updateRefundHistory = await donationCollection.updateOne({ _id: new ObjectId(id) }, updateDoc)
+
+                const deleteHistory = await paymentCollection.deleteOne({ donationId: id })
+
+                res.send({
+                    updateRefundHistory,
+                    deleteHistory
+                })
+            } catch (error) {
+                console.error('Refund Amount:', error.message)
+                res.status(500).send({ error: 'Failed to  refund donation amount' })
+            }
         })
 
         //  ------------------- Admin --------------------

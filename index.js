@@ -367,9 +367,22 @@ async function run() {
         app.post('/save-payment-history', async (req, res) => {
             const paymentHistory = req.body
 
-            const result = await paymentCollection.insertOne(paymentHistory)
+            const query = { _id: new ObjectId(paymentHistory?.donationId) }
 
-            res.send(result)
+            const savePayment = await paymentCollection.insertOne(paymentHistory)
+
+            const updateDoc = {
+                $inc: {
+                    totalDonateAmount: paymentHistory?.amount,
+                    totalDonateUser: 1
+                }
+            }
+
+            const updateHistory = await donationCollection.updateOne(query, updateDoc)
+
+            res.send({
+                savePayment
+            })
         })
 
         //  ------------------- Users --------------------

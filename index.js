@@ -314,6 +314,25 @@ async function run() {
             }
         });
 
+        // get 3 data for suggestion donation campaign
+        app.get('/suggestion-donation-campaign', async (req, res) => {
+            try {
+                const result = await donationCollection.aggregate([
+                    {
+                        $match: { status: 'Running' }
+                    },
+                    {
+                        $sample: { size: 3 }
+                    }
+                ]).toArray()
+
+                res.send(result)
+            } catch (error) {
+                console.error('suggestion donation:', error.message);
+                res.status(500).send({ error: 'Failed to get 3 suggestion donation campaign' });
+            }
+        })
+
         //  -------------- Common & Secure -------------
 
         // Update User

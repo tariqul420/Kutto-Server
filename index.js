@@ -675,6 +675,15 @@ async function run() {
 
                 const deleteHistory = await paymentCollection.deleteOne({ donationId: id })
 
+                const refund = await stripe.refunds.create({
+                    payment_intent: paymentRecord.paymentIntentId,
+                    amount: Math.round(amount * 100),
+                });
+
+                if (refund.status !== 'succeeded') {
+                    return res.status(400).send({ error: 'Stripe refund failed' });
+                }
+
                 res.send({
                     updateRefundHistory,
                     deleteHistory

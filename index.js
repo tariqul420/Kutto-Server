@@ -530,7 +530,7 @@ async function run() {
             }
         })
 
-        // get all pet adoption request
+        // get all pet adoption request for single user
         app.get('/adoption-request/:email', verifyToken, async (req, res) => {
             try {
                 const { email } = req.params
@@ -594,7 +594,7 @@ async function run() {
 
         // user & admin
         // donation status update
-        app.patch('/donation-status/:id', async (req, res) => {
+        app.patch('/donation-status/:id', verifyToken, async (req, res) => {
             try {
                 const id = req.params.id;
                 const status = req.query.status;

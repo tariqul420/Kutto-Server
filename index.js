@@ -161,7 +161,14 @@ async function run() {
                 const id = req.params.id
                 const query = { _id: new ObjectId(id) }
 
-                const result = await petCollection.findOne(query)
+                const projection = {
+                    projection: {
+                        "petOwner.name": 0,
+                        "petOwner.photoURL": 0,
+                    }
+                }
+
+                const result = await petCollection.findOne(query, projection)
                 res.send(result)
             } catch (error) {
                 console.error('get single pets:', error.message)
@@ -219,7 +226,8 @@ async function run() {
 
                 const projection = {
                     projection: {
-                        donationOwner: 0,
+                        "donationOwner.name": 0,
+                        "donationOwner.photoURL": 0,
                         totalDonateUser: 0
                     }
                 }

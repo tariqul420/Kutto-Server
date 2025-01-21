@@ -11,8 +11,8 @@ This is the backend server for the **Kutto** application, a pet adoption platfor
 
 ## 🚀 Live Links
 
-- **Client Repo:** [_github/tariqul420/kutto-client_](https://github.com/Programming-Hero-Web-Course4/b10a12-client-side-tariqul420.git)
-- **Server Repo:** [_github/tariqul420/kutto-server_](https://github.com/Programming-Hero-Web-Course4/b10a12-server-side-tariqul420.git)
+- **Client Repo:** [_github/tariqul420/Kutto_](https://github.com/tariqul420/Kutto.git)
+- **Server Repo:** This repository serves as the main `Kutto` platform and includes the `backend` setup.
 - **Live Site:** [_Kutto.com_](https://kutto-0.web.app)
 - **Alternate Live Site:** [_Kutto-2.com_](https://kutto-0.firebaseapp.com)
 
@@ -128,8 +128,8 @@ This is the backend server for the **Kutto** application, a pet adoption platfor
 1. Clone the client-side repository:
 
    ```bash
-   git clone https://github.com/Programming-Hero-Web-Course4/b10a12-client-side-tariqul420.git
-   cd b10a12-client-side-tariqul420
+   git clone https://github.com/tariqul420/Kutto.git
+   cd Kutto
    ```
 
 2. Install dependencies:
@@ -166,8 +166,8 @@ This is the backend server for the **Kutto** application, a pet adoption platfor
 1. Clone the client-side repository:
 
    ```bash
-   git clone https://github.com/Programming-Hero-Web-Course4/b10a12-server-side-tariqul420.git
-   cd b10a12-server-side-tariqul420
+   git clone https://github.com/tariqul420/Kutto-Server.git
+   cd Kutto-Server
    ```
 
 2. Install dependencies:

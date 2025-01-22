@@ -325,8 +325,8 @@ async function run() {
 
             const updateDoc = {
                 $set: {
-                    displayName: userData?.displayName,
-                    photoURL: userData?.photoUrl
+                    name: userData?.name,
+                    image: userData?.image
                 }
             }
 

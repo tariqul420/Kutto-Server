@@ -402,6 +402,45 @@ async function run() {
             }
         })
 
+        app.get('/overview-details', async (req, res) => {
+            try {
+                const email = req.query.email || ''
+
+                const allUser = await usersCollection.estimatedDocumentCount();
+                const allPet = await petCollection.estimatedDocumentCount();
+                const allDonator = await donationCollection.estimatedDocumentCount();
+                const totalDonation = await donationCollection.aggregate([
+                    {
+                        $group: {
+                            _id: null,
+                            totalAmount: { $sum: "$totalDonateAmount" }
+                        }
+                    }
+                ]).toArray();
+
+                const myPet = await petCollection.countDocuments({ 'petOwner.email': email });
+                const adoptionRequest = await adoptionCollection.countDocuments({ 'petOwner.email': email });
+
+                const myDonate = await donationCollection.aggregate([
+                    {
+                        $match: { "donationOwner.email": email }
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            totalAmount: { $sum: "$totalDonateAmount" }
+                        }
+                    }
+                ]).toArray();
+                const donationCampaign = await donationCollection.countDocuments({ 'donationOwner.email': email });
+
+                res.status(200).json({ allUser, allPet, allDonator, totalDonation, myPet, adoptionRequest, myDonate, donationCampaign });
+            } catch (error) {
+                console.error('Error fetching overview details:', error.message);
+                res.status(500).json({ error: 'Failed to get overview details' });
+            }
+        });
+
         //  ------------------- Users --------------------
 
         // save single pet data on database

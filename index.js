@@ -436,7 +436,7 @@ async function run() {
             }
         })
 
-        app.get('/overview-details', async (req, res) => {
+        app.get('/overview-details', verifyToken, async (req, res) => {
             try {
                 const email = req.query.email || ''
 
@@ -466,9 +466,14 @@ async function run() {
                         }
                     }
                 ]).toArray();
+
                 const donationCampaign = await donationCollection.countDocuments({ 'donationOwner.email': email });
 
-                res.status(200).json({ allUser, allPet, allDonator, totalDonation, myPet, adoptionRequest, myDonate, donationCampaign });
+                const adopted = await petCollection.countDocuments({
+                    'petOwner.email': email, adopted: true
+                });
+
+                res.status(200).json({ allUser, allPet, allDonator, totalDonation, myPet, adoptionRequest, myDonate, donationCampaign, adopted });
             } catch (error) {
                 console.error('Error fetching overview details:', error.message);
                 res.status(500).json({ error: 'Failed to get overview details' });

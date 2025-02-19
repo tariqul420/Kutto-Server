@@ -251,7 +251,20 @@ async function run() {
                     query.donationName = { $regex: search, $options: "i" };
                 }
 
-                const sortQuery = sort === "new" ? { createdAt: -1 } : sort === "old" ? { createdAt: 1 } : {};
+                let sortQuery = {};
+                if (sort === "new") {
+                    sortQuery = { createdAt: -1 };
+                } else if (sort === "old") {
+                    sortQuery = { createdAt: 1 };
+                } else if (sort === "asc") {
+                    sortQuery = {
+                        maxAmount: 1
+                    };
+                } else if (sort === "desc") {
+                    sortQuery = {
+                        maxAmount: -1
+                    };
+                }
 
                 const skip = (page - 1) * parseInt(limit);
 

@@ -316,6 +316,27 @@ async function run() {
             }
         })
 
+        // recent pets for home page
+        app.get('/recent-pets', async (req, res) => {
+            try {
+                const projection = {
+                    projection: {
+                        _id: 1,
+                        petImage: 1,
+                        petName: 1,
+                        petAdopter: 1,
+                        status: 1
+                    }
+                }
+
+                const result = await petCollection.find({}, projection).sort({ createdAt: -1 }).limit(8).toArray()
+                res.status(200).send(result)
+            } catch (error) {
+                console.error('recent pets:', error.message)
+                res.status(500).send({ error: 'Failed to get recent pets' })
+            }
+        })
+
         //  -------------- Common & Secure -------------
 
         // Update User

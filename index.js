@@ -179,7 +179,7 @@ async function run() {
         // get all pet which not adopted for pet listing page
         app.get('/all-pet', async (req, res) => {
             try {
-                const { search = "", category = "", sort = "", page = 1, limit = 6 } = req.query;
+                const { search = "", category = "", sort = "", page = 1, limit = 8 } = req.query;
 
                 const query = { adopted: false };
                 if (search) {
@@ -243,7 +243,7 @@ async function run() {
         // get all donation data
         app.get('/donation-campaign', async (req, res) => {
             try {
-                const { search = "", sort = "", page = 1, limit = 6 } = req.query;
+                const { search = "", sort = "", page = 1, limit = 8 } = req.query;
 
                 const query = {}
 

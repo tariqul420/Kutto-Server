@@ -13,7 +13,7 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 const corsOptions = {
-  origin: ['http://localhost:5173', 'https://kutto-0.web.app', 'https://kutto-0.firebaseapp.com'],
+  origin: ['http://localhost:5173', 'https://kutto-0.web.app', 'https://kutto-0.firebaseapp.com, https://kutto.tariqul.dev'],
   credentials: true,
 };
 
